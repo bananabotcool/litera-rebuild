@@ -28,6 +28,20 @@ export class UIController {
         }
     }
     
+    showLoading(message = 'Loading...') {
+        const view = document.getElementById('document-view');
+        view.innerHTML = `
+            <div class="loading-overlay">
+                <div class="loading-spinner"></div>
+                <p>${message}</p>
+            </div>
+        `;
+    }
+    
+    hideLoading() {
+        // Content will be replaced by showDocument or renderComparison
+    }
+    
     showDocument(content, type) {
         const view = document.getElementById('document-view');
         
