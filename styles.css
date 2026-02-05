@@ -317,6 +317,36 @@ del {
     background: #fde68a;
 }
 
+.change-item.selected {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Accept/Reject Buttons */
+.change-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.btn-accept, .btn-reject {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-accept {
+    background: var(--success);
+    color: white;
+}
+
+.btn-reject {
+    background: var(--danger);
+    color: white;
+}
+
 /* Comparison View Styles */
 .comparison-view {
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;

@@ -57,11 +57,32 @@ export class UIController {
     
     renderComparison(changes) {
         const view = document.getElementById('document-view');
+        view.innerHTML = ''; // Clear existing content
         
         if (this.currentView === 'unified') {
             view.innerHTML = this.renderUnifiedView(changes);
         } else {
             view.innerHTML = this.renderSplitView(changes);
+        }
+        
+        // Add event listeners to change items
+        document.querySelectorAll('.change-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const id = parseInt(item.dataset.id);
+                this.highlightChange(id);
+            });
+        });
+    }
+    
+    highlightChange(id) {
+        document.querySelectorAll('.change-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+        
+        const item = document.querySelector(`.change-item[data-id="${id}"]`);
+        if (item) {
+            item.classList.add('selected');
+            item.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }
     
