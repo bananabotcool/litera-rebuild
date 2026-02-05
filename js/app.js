@@ -19,6 +19,7 @@ class LiteraApp {
         };
         
         this.changes = [];
+        this.currentChangeIndex = -1;
         
         this.init();
     }

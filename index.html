@@ -49,6 +49,15 @@
                         <button class="view-btn active" data-view="unified">Unified</button>
                         <button class="view-btn" data-view="split">Split</button>
                     </div>
+                    <div class="search-box">
+                        <input type="text" id="search-input" placeholder="🔍 Search changes...">
+                        <span id="search-results"></span>
+                    </div>
+                    <div class="nav-controls">
+                        <button id="prev-change" class="nav-btn">← Previous</button>
+                        <span id="change-counter">0 of 0</span>
+                        <button id="next-change" class="nav-btn">Next →</button>
+                    </div>
                     <div class="zoom-controls">
                         <button id="zoom-out">-</button>
                         <span id="zoom-level">100%</span>
