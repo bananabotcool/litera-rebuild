@@ -208,8 +208,8 @@ class LiteraApp {
         this.ui.switchView(view);
     }
     
-    exportDocument() {
-        this.ui.exportDocument(this.changes);
+    exportDocument(format = 'html') {
+        this.ui.exportDocument(this.changes, format);
     }
 }
 

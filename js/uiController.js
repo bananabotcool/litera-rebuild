@@ -222,19 +222,88 @@ export class UIController {
         alert(message);
     }
     
-    exportDocument(changes) {
-        const acceptedChanges = changes.filter(c => c.accepted);
-        const content = JSON.stringify(acceptedChanges, null, 2);
+    exportDocument(changes, format = 'html') {
+        const acceptedChanges = changes.filter(c => c.accepted !== false);
         
-        const blob = new Blob([content], { type: 'application/json' });
+        let content, mimeType, filename;
+        
+        if (format === 'html') {
+            content = this.generateExportHTML(acceptedChanges);
+            mimeType = 'text/html';
+            filename = 'comparison-result.html';
+        } else if (format === 'json') {
+            content = JSON.stringify(acceptedChanges, null, 2);
+            mimeType = 'application/json';
+            filename = 'comparison-results.json';
+        } else if (format === 'txt') {
+            content = this.generateExportText(acceptedChanges);
+            mimeType = 'text/plain';
+            filename = 'comparison-results.txt';
+        }
+        
+        const blob = new Blob([content], { type: mimeType });
         const url = URL.createObjectURL(blob);
         
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'comparison-results.json';
+        a.download = filename;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
         
         URL.revokeObjectURL(url);
+    }
+    
+    generateExportHTML(changes) {
+        return `<!DOCTYPE html>
+<html>
+<head>
+    <title>Litera Comparison Results</title>
+    <style>
+        body { font-family: system-ui; max-width: 800px; margin: 2rem auto; padding: 1rem; }
+        h1 { color: #2563eb; }
+        .change { margin: 1rem 0; padding: 1rem; border-radius: 8px; }
+        .add { background: #dcfce7; border-left: 4px solid #16a34a; }
+        .remove { background: #fee2e2; border-left: 4px solid #dc2626; }
+        .modify { background: #fef3c7; border-left: 4px solid #f59e0b; }
+        .change-type { font-weight: bold; text-transform: uppercase; font-size: 0.75rem; }
+        .add .change-type { color: #16a34a; }
+        .remove .change-type { color: #dc2626; }
+        .modify .change-type { color: #f59e0b; }
+        ins { background: #dcfce7; text-decoration: none; }
+        del { background: #fee2e2; text-decoration: line-through; }
+    </style>
+</head>
+<body>
+    <h1>Document Comparison Results</h1>
+    <p>Generated: ${new Date().toLocaleString()}</p>
+    <p>Total Changes: ${changes.length}</p>
+    ${changes.map(c => `
+        <div class="change ${c.type}">
+            <div class="change-type">${c.type} - Line ${c.lineNumber}</div>
+            ${c.type === 'add' ? `<ins>${this.escapeHtml(c.revisedText)}</ins>` : ''}
+            ${c.type === 'remove' ? `<del>${this.escapeHtml(c.originalText)}</del>` : ''}
+            ${c.type === 'modify' ? `<del>${this.escapeHtml(c.originalText)}</del> → <ins>${this.escapeHtml(c.revisedText)}</ins>` : ''}
+        </div>
+    `).join('')}
+</body>
+</html>`;
+    }
+    
+    generateExportText(changes) {
+        let text = `DOCUMENT COMPARISON RESULTS\n`;
+        text += `Generated: ${new Date().toLocaleString()}\n`;
+        text += `Total Changes: ${changes.length}\n\n`;
+        text += `=${'='.repeat(50)}\n\n`;
+        
+        changes.forEach(c => {
+            text += `[${c.type.toUpperCase()}] Line ${c.lineNumber}\n`;
+            if (c.originalText) text += `Original: ${c.originalText}\n`;
+            if (c.revisedText) text += `Revised: ${c.revisedText}\n`;
+            text += `\n`;
+        });
+        
+        return text;
     }
     
     escapeHtml(text) {
