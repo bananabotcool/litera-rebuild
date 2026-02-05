@@ -101,6 +101,53 @@ class LiteraApp {
         // Zoom controls
         document.getElementById('zoom-in').addEventListener('click', () => this.ui.zoomIn());
         document.getElementById('zoom-out').addEventListener('click', () => this.ui.zoomOut());
+        
+        // Navigation controls
+        document.getElementById('prev-change').addEventListener('click', () => this.navigateChange(-1));
+        document.getElementById('next-change').addEventListener('click', () => this.navigateChange(1));
+        
+        // Search
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            this.searchChanges(e.target.value);
+        });
+    }
+    
+    navigateChange(direction) {
+        if (this.changes.length === 0) return;
+        
+        this.currentChangeIndex += direction;
+        
+        if (this.currentChangeIndex < 0) {
+            this.currentChangeIndex = this.changes.length - 1;
+        } else if (this.currentChangeIndex >= this.changes.length) {
+            this.currentChangeIndex = 0;
+        }
+        
+        const changeId = this.changes[this.currentChangeIndex].id;
+        this.ui.highlightChange(changeId);
+        this.updateChangeCounter();
+    }
+    
+    updateChangeCounter() {
+        const counter = document.getElementById('change-counter');
+        if (counter && this.changes.length > 0) {
+            counter.textContent = `${this.currentChangeIndex + 1} of ${this.changes.length}`;
+        }
+    }
+    
+    searchChanges(query) {
+        if (!query) {
+            this.ui.renderChangesList(this.changes, this);
+            return;
+        }
+        
+        const filtered = this.changes.filter(c => {
+            const text = (c.originalText + ' ' + c.revisedText).toLowerCase();
+            return text.includes(query.toLowerCase());
+        });
+        
+        this.ui.renderChangesList(filtered, this);
+        document.getElementById('search-results').textContent = ` (${filtered.length} found)`;
     }
     
     async handleFileSelect(file) {
@@ -173,6 +220,9 @@ class LiteraApp {
         this.ui.renderChangesList(this.changes, this);
         this.ui.updateStats(this.changes.length);
         this.ui.enableButton('export-btn');
+        
+        this.currentChangeIndex = 0;
+        this.updateChangeCounter();
         
         console.log('✅ Comparison complete:', this.changes.length, 'changes found');
     }
