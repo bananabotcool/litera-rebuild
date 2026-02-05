@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Litera Test</title>
+    <style>
+        body { font-family: system-ui; padding: 2rem; }
+        .test { margin: 1rem 0; padding: 1rem; background: #f0f0f0; }
+        ins { background: #dcfce7; color: #16a34a; }
+        del { background: #fee2e2; color: #dc2626; text-decoration: line-through; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Litera Comparison Test</h1>
+    <div id="output"></div>
+    
+    <script type="module">
+        import { ComparisonEngine } from '../js/comparisonEngine.js';
+        
+        const engine = new ComparisonEngine();
+        
+        const doc1 = `This is the first line.
+This is the second line.
+This line will be removed.
+This is the fourth line.`;
+
+        const doc2 = `This is the first line.
+This is the modified second line.
+This is the fourth line.
+This is a new fifth line.`;
+
+        const changes = engine.compare(doc1, doc2);
+        
+        let html = '<h2>Changes Found: ' + changes.length + '</h2>';
+        html += '<div class="test">' + engine.generateUnifiedView(changes) + '</div>';
+        
+        html += '<h3>Detailed Changes:</h3>';
+        changes.forEach(c => {
+            html += `<div class="test">
+                <strong>${c.type.toUpperCase()}</strong> (Line ${c.lineNumber})<br>
+                <del>${c.originalText || '(none)'}</del><br>
+                <ins>${c.revisedText || '(none)'}</ins>
+            </div>`;
+        });
+        
+        document.getElementById('output').innerHTML = html;
+        console.log('Test complete:', changes);
+    </script>
+</body>
+</html>
