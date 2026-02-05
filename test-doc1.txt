@@ -1,0 +1,15 @@
+Contract Agreement - Version A
+
+This agreement is made between Company ABC and Client XYZ.
+
+Payment Terms:
+- Total amount: $10,000
+- Due date: January 15, 2024
+- Payment method: Wire transfer
+
+Deliverables:
+1. Project proposal
+2. Initial prototype
+3. Final product
+
+Both parties agree to the terms above.
