@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Litera Diagnostic Test</title>
+    <style>
+        body { font-family: system-ui; padding: 2rem; max-width: 1200px; margin: 0 auto; }
+        .success { background: #dcfce7; padding: 1rem; border-left: 4px solid #16a34a; }
+        .error { background: #fee2e2; padding: 1rem; border-left: 4px solid #dc2626; }
+        .test-section { margin: 1rem 0; padding: 1rem; background: #f8fafc; border-radius: 8px; }
+        pre { background: #1e293b; color: #e2e8f0; padding: 1rem; overflow: auto; }
+        ins { background: #dcfce7; color: #16a34a; text-decoration: none; padding: 2px; }
+        del { background: #fee2e2; color: #dc2626; text-decoration: line-through; padding: 2px; }
+        .btn { padding: 0.5rem 1rem; margin: 0.5rem; cursor: pointer; background: #2563eb; color: white; border: none; border-radius: 4px; }
+        #drop-zone { border: 2px dashed #cbd5e1; padding: 2rem; text-align: center; margin: 1rem 0; }
+        #drop-zone.dragover { background: #dbeafe; border-color: #2563eb; }
+    </style>
+</head>
+<body>
+    <h1>Litera Diagnostic Test</h1>
+    <div id="results"></div>
+
+    <script type="module">
+        import { DocumentLoader } from './js/documentLoader.js';
+        import { ComparisonEngine } from './js/comparisonEngine.js';
+        import { UIController } from './js/uiController.js';
+        
+        const results = document.getElementById('results');
+        
+        function log(msg, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'test-section';
+            div.innerHTML = msg;
+            results.appendChild(div);
+        }
+        
+        // Test 1: Module Loading
+        try {
+            const loader = new DocumentLoader();
+            const engine = new ComparisonEngine();
+            const ui = new UIController();
+            log('All modules loaded successfully', 'success');
+        } catch (e) {
+            log('Module loading FAILED: ' + e.message, 'error');
+        }
+        
+        // Test 2: Comparison Engine
+        try {
+            const engine = new ComparisonEngine();
+            const doc1 = 'Line 1\nLine 2\nLine 3';
+            const doc2 = 'Line 1\nModified Line 2\nLine 3\nLine 4';
+            const changes = engine.compare(doc1, doc2);
+            
+            log(`Comparison test: Found ${changes.length} changes`, 'success');
+            
+            const html = engine.generateUnifiedView(changes);
+            log('Unified view generated:<br>' + html);
+        } catch (e) {
+            log('Comparison test FAILED: ' + e.message, 'error');
+            console.error(e);
+        }
+        
+        // Test 3: Document Loader
+        try {
+            const loader = new DocumentLoader();
+            log('DocumentLoader created', 'success');
+        } catch (e) {
+            log('DocumentLoader FAILED: ' + e.message, 'error');
+        }
+        
+        // Test 4: Check DOM elements
+        const requiredElements = ['drop-zone', 'document-view', 'changes-list', 'file-input'];
+        const missing = requiredElements.filter(id => !document.getElementById(id));
+        if (missing.length === 0) {
+            log('All required DOM elements found', 'success');
+        } else {
+            log('Missing DOM elements: ' + missing.join(', '), 'error');
+        }
+    </script>
+</body>
+</html>

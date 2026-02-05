@@ -13,7 +13,7 @@ export class UIController {
         view.innerHTML = `
             <div class="drop-zone" id="drop-zone">
                 <div class="drop-content">
-                    <span class="drop-icon">📄</span>
+                    <span class="drop-icon">[DOC]</span>
                     <p>Drag & drop documents here</p>
                     <p class="drop-hint">or click to browse</p>
                 </div>
