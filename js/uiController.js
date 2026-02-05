@@ -139,7 +139,7 @@ export class UIController {
         }
     }
     
-    renderChangesList(changes) {
+    renderChangesList(changes, appInstance) {
         const list = document.getElementById('changes-list');
         
         if (changes.length === 0) {
@@ -149,22 +149,32 @@ export class UIController {
         
         let html = '';
         changes.forEach(change => {
-            const typeIcon = change.type === 'add' ? '➕' : change.type === 'remove' ? '➖' : '✏️';
             const preview = (change.revisedText || change.originalText || '').substring(0, 50);
+            const statusClass = change.accepted ? 'accepted' : change.rejected ? 'rejected' : '';
             
             html += `
-                <div class="change-item-sidebar" data-id="${change.id}">
-                    <span class="change-icon ${change.type}">${typeIcon}</span>
-                    <div class="change-info">
+                <div class="change-item-sidebar ${statusClass}" data-id="${change.id}">
+                    <div class="change-info" onclick="if(window.litera) window.litera.ui.highlightChange(${change.id})">
                         <span class="change-type">${change.type}</span>
                         <span class="change-preview">${this.escapeHtml(preview)}${preview.length >= 50 ? '...' : ''}</span>
                     </div>
-                    <button class="btn-navigate" onclick="scrollToChange(${change.id})">→</button>
+                    <div class="change-actions">
+                        <button class="btn-accept" onclick="if(window.litera) window.litera.acceptChange(${change.id})">✓</button>
+                        <button class="btn-reject" onclick="if(window.litera) window.litera.rejectChange(${change.id})">✕</button>
+                    </div>
                 </div>
             `;
         });
         
         list.innerHTML = html;
+    }
+    
+    updateChangeStatus(id, status) {
+        const item = document.querySelector(`.change-item-sidebar[data-id="${id}"]`);
+        if (item) {
+            item.classList.remove('accepted', 'rejected');
+            item.classList.add(status);
+        }
     }
     
     updateStats(totalCount) {

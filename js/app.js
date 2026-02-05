@@ -169,11 +169,31 @@ class LiteraApp {
         );
         
         this.ui.renderComparison(this.changes);
-        this.ui.renderChangesList(this.changes);
+        this.ui.renderChangesList(this.changes, this);
         this.ui.updateStats(this.changes.length);
         this.ui.enableButton('export-btn');
         
         console.log('✅ Comparison complete:', this.changes.length, 'changes found');
+    }
+    
+    acceptChange(id) {
+        const change = this.changes.find(c => c.id === id);
+        if (change) {
+            change.accepted = true;
+            change.rejected = false;
+            this.ui.updateChangeStatus(id, 'accepted');
+            console.log('✅ Change', id, 'accepted');
+        }
+    }
+    
+    rejectChange(id) {
+        const change = this.changes.find(c => c.id === id);
+        if (change) {
+            change.accepted = false;
+            change.rejected = true;
+            this.ui.updateChangeStatus(id, 'rejected');
+            console.log('❌ Change', id, 'rejected');
+        }
     }
     
     filterChanges(type) {
