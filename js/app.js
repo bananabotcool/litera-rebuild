@@ -268,3 +268,34 @@ class LiteraApp {
 document.addEventListener('DOMContentLoaded', () => {
     window.litera = new LiteraApp();
 });
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    if (!window.litera || !window.litera.changes.length) return;
+    
+    if (e.key === 'ArrowUp' && e.altKey) {
+        e.preventDefault();
+        window.litera.navigateChange(-1);
+    } else if (e.key === 'ArrowDown' && e.altKey) {
+        e.preventDefault();
+        window.litera.navigateChange(1);
+    } else if (e.key === 'PageUp') {
+        e.preventDefault();
+        window.litera.navigateChange(-1);
+    } else if (e.key === 'PageDown') {
+        e.preventDefault();
+        window.litera.navigateChange(1);
+    } else if (e.key === 'a' && e.ctrlKey) {
+        e.preventDefault();
+        if (window.litera.changes[window.litera.currentChangeIndex]) {
+            const changeId = window.litera.changes[window.litera.currentChangeIndex].id;
+            window.litera.acceptChange(changeId);
+        }
+    } else if (e.key === 'r' && e.ctrlKey) {
+        e.preventDefault();
+        if (window.litera.changes[window.litera.currentChangeIndex]) {
+            const changeId = window.litera.changes[window.litera.currentChangeIndex].id;
+            window.litera.rejectChange(changeId);
+        }
+    }
+});

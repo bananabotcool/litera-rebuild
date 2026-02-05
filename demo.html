@@ -3,245 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Litera Demo - Working Comparison</title>
+    <title>Litera Rebuild - Demo</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #2563eb;
-            --danger: #dc2626;
-            --success: #16a34a;
-            --warning: #f59e0b;
-            --bg: #f8fafc;
-            --text: #1e293b;
-        }
         body {
             font-family: system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            background: #f8fafc;
             padding: 2rem;
-        }
-        .container {
             max-width: 1200px;
             margin: 0 auto;
         }
-        h1 {
-            color: var(--primary);
-            margin-bottom: 1rem;
-        }
+        h1 { color: #1e293b; margin-bottom: 1rem; }
         .demo-section {
             background: white;
             padding: 1.5rem;
-            border-radius: 12px;
+            border-radius: 8px;
             margin-bottom: 1.5rem;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        h2 {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
-            color: var(--text);
         }
         textarea {
             width: 100%;
             height: 150px;
             padding: 1rem;
             border: 1px solid #e2e8f0;
-            border-radius: 8px;
+            border-radius: 6px;
             font-family: monospace;
-            font-size: 14px;
-            resize: vertical;
+            margin-top: 0.5rem;
         }
-        .btn {
-            background: var(--primary);
+        button {
+            background: #2563eb;
             color: white;
             padding: 0.75rem 1.5rem;
             border: none;
-            border-radius: 8px;
-            font-weight: 600;
+            border-radius: 6px;
             cursor: pointer;
+            font-weight: 500;
             margin-top: 1rem;
         }
-        .btn:hover {
-            opacity: 0.9;
-        }
-        .results {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
+        button:hover { background: #1d4ed8; }
+        .result {
             margin-top: 1.5rem;
-        }
-        .change {
-            padding: 0.75rem;
-            margin: 0.5rem 0;
+            padding: 1rem;
+            background: #f8fafc;
             border-radius: 6px;
-            font-family: monospace;
-            font-size: 14px;
         }
-        .add {
-            background: #dcfce7;
-            border-left: 4px solid var(--success);
-        }
-        .remove {
-            background: #fee2e2;
-            border-left: 4px solid var(--danger);
-        }
-        .modify {
-            background: #fef3c7;
-            border-left: 4px solid var(--warning);
-        }
-        ins {
-            background: #86efac;
-            text-decoration: none;
-            padding: 0 2px;
-        }
-        del {
-            background: #fca5a5;
-            text-decoration: line-through;
-            padding: 0 2px;
-        }
-        .stats {
-            display: flex;
-            gap: 2rem;
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .stat {
-            display: flex;
-            flex-direction: column;
-        }
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-        .stat-label {
-            font-size: 0.875rem;
-            color: #64748b;
-        }
+        ins { background: #dcfce7; text-decoration: none; padding: 0 2px; }
+        del { background: #fee2e2; text-decoration: line-through; padding: 0 2px; }
+        .change { margin: 0.5rem 0; padding: 0.5rem; border-radius: 4px; }
+        .add { border-left: 3px solid #16a34a; }
+        .remove { border-left: 3px solid #dc2626; }
+        .stats { display: flex; gap: 2rem; margin: 1rem 0; }
+        .stat { text-align: center; }
+        .stat-value { font-size: 2rem; font-weight: bold; color: #2563eb; }
+        .stat-label { color: #64748b; font-size: 0.875rem; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Litera Rebuild - Working Demo</h1>
-        
-        <div class="demo-section">
-            <h2>Original Document</h2>
-            <textarea id="doc1" placeholder="Paste original text here...">This is the first line of the contract.
-The second line contains important terms.
-This line will be removed in the revision.
-The fourth line has the signature block.</textarea>
-        </div>
-        
-        <div class="demo-section">
-            <h2>Revised Document</h2>
-            <textarea id="doc2" placeholder="Paste revised text here...">This is the first line of the contract.
-The second line contains modified important terms and conditions.
-The fourth line has the signature block.
-This is a new fifth line with additional clauses.</textarea>
-        </div>
-        
-        <button class="btn" onclick="compare()">Compare Documents</button>
-        
-        <div id="results" class="results" style="display: none;">
-            <h2>Comparison Results</h2>
-            <div class="stats">
-                <div class="stat">
-                    <span class="stat-value" id="total-count">0</span>
-                    <span class="stat-label">Total Changes</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-value" id="add-count">0</span>
-                    <span class="stat-label">Additions</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-value" id="remove-count">0</span>
-                    <span class="stat-label">Deletions</span>
-                </div>
-            </div>
-            <div id="changes-list"></div>
-        </div>
+    <h1>Litera Rebuild - Live Demo</h1>
+    
+    <div class="demo-section">
+        <h2>Original Document</h2>
+        <textarea id="doc1" placeholder="Enter original text here...">This is the first paragraph.
+This is the second paragraph that will be modified.
+This paragraph will be deleted entirely.
+This is the fourth paragraph.</textarea>
     </div>
-
-    <script>
-        function compare() {
-            const doc1 = document.getElementById('doc1').value.split('\n');
-            const doc2 = document.getElementById('doc2').value.split('\n');
+    
+    <div class="demo-section">
+        <h2>Revised Document</h2>
+        <textarea id="doc2" placeholder="Enter revised text here...">This is the first paragraph.
+This is the completely rewritten second paragraph with new content.
+This is the fourth paragraph.
+This is a brand new fifth paragraph added.</textarea>
+    </div>
+    
+    <button onclick="compareDemo()">Compare Documents</button>
+    
+    <div class="demo-section" id="results" style="display:none;">
+        <h2>Comparison Results</h2>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="total-count">0</div>
+                <div class="stat-label">Total Changes</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="add-count">0</div>
+                <div class="stat-label">Additions</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="remove-count">0</div>
+                <div class="stat-label">Deletions</div>
+            </div>
+        </div>
+        <div id="comparison-output"></div>
+    </div>
+    
+    <script type="module">
+        import { ComparisonEngine } from './js/comparisonEngine.js';
+        
+        window.compareDemo = () => {
+            const doc1 = document.getElementById('doc1').value;
+            const doc2 = document.getElementById('doc2').value;
             
-            const changes = computeDiff(doc1, doc2);
+            if (!doc1 || !doc2) {
+                alert('Please enter text in both documents');
+                return;
+            }
+            
+            const engine = new ComparisonEngine();
+            const changes = engine.compare(doc1, doc2);
             
             document.getElementById('results').style.display = 'block';
             document.getElementById('total-count').textContent = changes.length;
             document.getElementById('add-count').textContent = changes.filter(c => c.type === 'add').length;
             document.getElementById('remove-count').textContent = changes.filter(c => c.type === 'remove').length;
             
-            renderChanges(changes);
-        }
-        
-        function computeDiff(original, revised) {
-            const changes = [];
-            let origIndex = 0, revIndex = 0;
+            document.getElementById('comparison-output').innerHTML = engine.generateUnifiedView(changes);
             
-            while (origIndex < original.length || revIndex < revised.length) {
-                const origLine = original[origIndex];
-                const revLine = revised[revIndex];
-                
-                if (origIndex >= original.length) {
-                    changes.push({
-                        type: 'add',
-                        line: revIndex + 1,
-                        revised: revLine
-                    });
-                    revIndex++;
-                } else if (revIndex >= revised.length) {
-                    changes.push({
-                        type: 'remove',
-                        line: origIndex + 1,
-                        original: origLine
-                    });
-                    origIndex++;
-                } else if (origLine === revLine) {
-                    origIndex++;
-                    revIndex++;
-                } else {
-                    changes.push({
-                        type: 'modify',
-                        line: origIndex + 1,
-                        original: origLine,
-                        revised: revLine
-                    });
-                    origIndex++;
-                    revIndex++;
-                }
-            }
-            
-            return changes;
-        }
-        
-        function renderChanges(changes) {
-            const container = document.getElementById('changes-list');
-            let html = '';
-            
-            changes.forEach(change => {
-                const content = change.type === 'add' 
-                    ? `<ins>${escapeHtml(change.revised)}</ins>`
-                    : change.type === 'remove'
-                    ? `<del>${escapeHtml(change.original)}</del>`
-                    : `<del>${escapeHtml(change.original)}</del> -> <ins>${escapeHtml(change.revised)}</ins>`;
-                
-                html += `<div class="change ${change.type}">
-<strong>${change.type.toUpperCase()}</strong> - Line ${change.line}<br>
-${content}
-</div>`;
-            });
-            
-            container.innerHTML = html;
-        }
-        
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+            window.scrollTo(0, document.body.scrollHeight);
+        };
     </script>
 </body>
 </html>
