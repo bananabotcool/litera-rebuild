@@ -30,14 +30,23 @@
                     <button class="filter-btn active" data-type="all">All</button>
                     <button class="filter-btn" data-type="add">Added</button>
                     <button class="filter-btn" data-type="remove">Removed</button>
+                    <button class="filter-btn" data-type="modify">Modified</button>
                 </div>
                 <div id="changes-list" class="changes-list">
-                    <p class="empty">No changes detected yet</p>
+                    <p class="empty">Upload documents to compare</p>
                 </div>
                 <div class="stats">
                     <div class="stat-item">
-                        <span class="stat-label">Total Changes:</span>
+                        <span class="stat-label">Total:</span>
                         <span id="total-changes" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Accepted:</span>
+                        <span id="accepted-count" class="stat-value success">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Rejected:</span>
+                        <span id="rejected-count" class="stat-value danger">0</span>
                     </div>
                 </div>
             </aside>

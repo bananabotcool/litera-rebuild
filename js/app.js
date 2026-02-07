@@ -1,25 +1,29 @@
 /**
- * Litera Rebuild - Main Application
- * Document redlining software rebuild
+ * Litera Pro - Main Application
+ * Document redlining with annotations and accept/reject
  */
 
 import { DocumentLoader } from './documentLoader.js';
 import { ComparisonEngine } from './comparisonEngine.js';
 import { UIController } from './uiController.js';
+import { AnnotationSystem } from './annotationSystem.js';
+import { ChangeManager } from './changeManager.js';
 
 class LiteraApp {
     constructor() {
         this.docLoader = new DocumentLoader();
         this.comparisonEngine = new ComparisonEngine();
         this.ui = new UIController();
+        this.annotations = new AnnotationSystem();
+        this.changeManager = new ChangeManager();
         
-        this.documents = {
-            original: null,
-            revised: null
-        };
+        // Global references
+        window.annotations = this.annotations;
+        window.changeManager = this.changeManager;
+        window.litera = this;
         
+        this.documents = { original: null, revised: null };
         this.changes = [];
-        this.currentChangeIndex = -1;
         
         this.init();
     }
@@ -27,275 +31,111 @@ class LiteraApp {
     init() {
         this.setupEventListeners();
         this.ui.showDropZone();
-        console.log('🚀 Litera Rebuild initialized');
+        console.log('Litera Pro initialized');
     }
     
     setupEventListeners() {
-        const dropZone = document.getElementById('drop-zone');
+        // File upload
         const fileInput = document.getElementById('file-input');
         const fileInput2 = document.getElementById('file-input-2');
+        const dropZone = document.getElementById('drop-zone');
         
-        // Drag & drop events
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('drag-over');
+        dropZone?.addEventListener('click', () => {
+            if (!this.documents.original) fileInput?.click();
+            else if (!this.documents.revised) fileInput2?.click();
         });
         
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('drag-over');
-        });
+        fileInput?.addEventListener('change', (e) => this.handleFile(e.target.files[0], 'original'));
+        fileInput2?.addEventListener('change', (e) => this.handleFile(e.target.files[0], 'revised'));
         
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            this.handleFileDrop(e.dataTransfer.files);
-        });
+        // Buttons
+        document.getElementById('compare-btn')?.addEventListener('click', () => this.compare());
+        document.getElementById('export-btn')?.addEventListener('click', () => this.export());
+    }
+    
+    handleFile(file, type) {
+        if (!file) return;
         
-        dropZone.addEventListener('click', () => {
-            if (!this.documents.original) {
-                fileInput.click();
-            } else if (!this.documents.revised) {
-                fileInput2.click();
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.documents[type] = e.target.result;
+            this.ui.updateDropZoneText(`${type}: ${file.name}`);
+            
+            if (this.documents.original && this.documents.revised) {
+                document.getElementById('compare-btn').disabled = false;
             }
-        });
-        
-        fileInput.addEventListener('change', (e) => {
-            this.handleFileSelect(e.target.files[0]);
-        });
-        
-        fileInput2.addEventListener('change', (e) => {
-            this.handleSecondFileSelect(e.target.files[0]);
-        });
-        
-        // Button events
-        document.getElementById('upload-btn').addEventListener('click', () => {
-            fileInput.click();
-        });
-        
-        document.getElementById('compare-btn').addEventListener('click', () => {
-            this.compareDocuments();
-        });
-        
-        document.getElementById('export-btn').addEventListener('click', () => {
-            this.exportDocument();
-        });
-        
-        // Filter buttons
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                this.filterChanges(e.target.dataset.type);
-            });
-        });
-        
-        // View toggle
-        document.querySelectorAll('.view-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                this.switchView(e.target.dataset.view);
-            });
-        });
-        
-        // Zoom controls
-        document.getElementById('zoom-in').addEventListener('click', () => this.ui.zoomIn());
-        document.getElementById('zoom-out').addEventListener('click', () => this.ui.zoomOut());
-        
-        // Navigation controls
-        document.getElementById('prev-change').addEventListener('click', () => this.navigateChange(-1));
-        document.getElementById('next-change').addEventListener('click', () => this.navigateChange(1));
-        
-        // Search
-        document.getElementById('search-input').addEventListener('input', (e) => {
-            this.searchChanges(e.target.value);
-        });
+        };
+        reader.readAsText(file);
     }
     
-    navigateChange(direction) {
-        if (this.changes.length === 0) return;
-        
-        this.currentChangeIndex += direction;
-        
-        if (this.currentChangeIndex < 0) {
-            this.currentChangeIndex = this.changes.length - 1;
-        } else if (this.currentChangeIndex >= this.changes.length) {
-            this.currentChangeIndex = 0;
-        }
-        
-        const changeId = this.changes[this.currentChangeIndex].id;
-        this.ui.highlightChange(changeId);
-        this.updateChangeCounter();
-    }
-    
-    updateChangeCounter() {
-        const counter = document.getElementById('change-counter');
-        if (counter && this.changes.length > 0) {
-            counter.textContent = `${this.currentChangeIndex + 1} of ${this.changes.length}`;
-        }
-    }
-    
-    searchChanges(query) {
-        if (!query) {
-            this.ui.renderChangesList(this.changes, this);
-            return;
-        }
-        
-        const filtered = this.changes.filter(c => {
-            const text = (c.originalText + ' ' + c.revisedText).toLowerCase();
-            return text.includes(query.toLowerCase());
-        });
-        
-        this.ui.renderChangesList(filtered, this);
-        document.getElementById('search-results').textContent = ` (${filtered.length} found)`;
-    }
-    
-    async handleFileSelect(file) {
-        if (!file) return;
-        
-        try {
-            const content = await this.docLoader.loadFile(file);
-            this.documents.original = {
-                name: file.name,
-                content: content,
-                type: file.type
-            };
-            
-            this.ui.showDocument(content, 'original');
-            this.ui.enableButton('compare-btn');
-            this.ui.updateDropZoneText('Drop second document or click to browse');
-            
-            console.log('✅ Original document loaded:', file.name);
-        } catch (error) {
-            console.error('❌ Failed to load document:', error);
-            this.ui.showError('Failed to load document: ' + error.message);
-        }
-    }
-    
-    async handleSecondFileSelect(file) {
-        if (!file) return;
-        
-        try {
-            const content = await this.docLoader.loadFile(file);
-            this.documents.revised = {
-                name: file.name,
-                content: content,
-                type: file.type
-            };
-            
-            this.ui.showDocument(content, 'revised');
-            this.ui.enableButton('compare-btn');
-            
-            console.log('✅ Revised document loaded:', file.name);
-        } catch (error) {
-            console.error('❌ Failed to load document:', error);
-            this.ui.showError('Failed to load document: ' + error.message);
-        }
-    }
-    
-    handleFileDrop(files) {
-        if (files.length === 0) return;
-        
-        if (!this.documents.original) {
-            this.handleFileSelect(files[0]);
-        } else if (!this.documents.revised && files.length > 1) {
-            this.handleSecondFileSelect(files[1]);
-        }
-    }
-    
-    compareDocuments() {
-        if (!this.documents.original || !this.documents.revised) {
-            this.ui.showError('Please load both documents before comparing');
-            return;
-        }
-        
-        console.log('🔍 Comparing documents...');
+    compare() {
+        if (!this.documents.original || !this.documents.revised) return;
         
         this.changes = this.comparisonEngine.compare(
-            this.documents.original.content,
-            this.documents.revised.content
+            this.documents.original,
+            this.documents.revised
         );
         
+        this.renderChanges();
         this.ui.renderComparison(this.changes);
-        this.ui.renderChangesList(this.changes, this);
-        this.ui.updateStats(this.changes.length);
-        this.ui.enableButton('export-btn');
         
-        this.currentChangeIndex = 0;
-        this.updateChangeCounter();
-        
-        console.log('✅ Comparison complete:', this.changes.length, 'changes found');
+        document.getElementById('export-btn').disabled = false;
     }
     
-    acceptChange(id) {
-        const change = this.changes.find(c => c.id === id);
-        if (change) {
-            change.accepted = true;
-            change.rejected = false;
-            this.ui.updateChangeStatus(id, 'accepted');
-            console.log('✅ Change', id, 'accepted');
+    renderChanges() {
+        const list = document.getElementById('changes-list');
+        if (!list) return;
+        
+        if (this.changes.length === 0) {
+            list.innerHTML = '<p class="empty">No changes</p>';
+            return;
         }
-    }
-    
-    rejectChange(id) {
-        const change = this.changes.find(c => c.id === id);
-        if (change) {
-            change.accepted = false;
-            change.rejected = true;
-            this.ui.updateChangeStatus(id, 'rejected');
-            console.log('❌ Change', id, 'rejected');
-        }
-    }
-    
-    filterChanges(type) {
-        const filtered = type === 'all' 
-            ? this.changes 
-            : this.changes.filter(c => c.type === type);
         
-        this.ui.renderChangesList(filtered);
+        list.innerHTML = this.changes.map(c => `
+            <div class="change-item ${this.changeManager.getState(c.id)}" data-id="${c.id}">
+                <div class="change-header">
+                    <span class="type-${c.type}">${c.type}</span>
+                    <span>Line ${c.lineNumber}</span>
+                </div>
+                <div class="preview">${(c.revisedText || c.originalText || '').slice(0, 50)}...</div>
+                <div class="actions">
+                    <button onclick="changeManager.acceptChange('${c.id}')">Accept</button>
+                    <button onclick="changeManager.rejectChange('${c.id}')">Reject</button>
+                    <span class="state">${this.changeManager.getState(c.id)}</span>
+                </div>
+                <div class="comments">
+                    ${this.annotations.renderCommentUI(c.id)}
+                </div>
+            </div>
+        `).join('');
+        
+        // Update stats
+        const accepted = this.changes.filter(c => this.changeManager.getState(c.id) === 'accepted').length;
+        const rejected = this.changes.filter(c => this.changeManager.getState(c.id) === 'rejected').length;
+        
+        document.getElementById('total-changes').textContent = this.changes.length;
+        document.getElementById('accepted-count').textContent = accepted;
+        document.getElementById('rejected-count').textContent = rejected;
     }
     
-    switchView(view) {
-        this.ui.switchView(view);
-    }
-    
-    exportDocument(format = 'html') {
-        this.ui.exportDocument(this.changes, format);
+    export() {
+        const content = this.changes.map(c => ({
+            ...c,
+            state: this.changeManager.getState(c.id),
+            comments: this.annotations.getCommentsForChange(c.id)
+        }));
+        
+        const blob = new Blob([JSON.stringify(content, null, 2)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'litera-comparison.json';
+        a.click();
+        
+        URL.revokeObjectURL(url);
     }
 }
 
-// Initialize app
-document.addEventListener('DOMContentLoaded', () => {
-    window.litera = new LiteraApp();
-});
-
-// Keyboard shortcuts
-document.addEventListener('keydown', (e) => {
-    if (!window.litera || !window.litera.changes.length) return;
-    
-    if (e.key === 'ArrowUp' && e.altKey) {
-        e.preventDefault();
-        window.litera.navigateChange(-1);
-    } else if (e.key === 'ArrowDown' && e.altKey) {
-        e.preventDefault();
-        window.litera.navigateChange(1);
-    } else if (e.key === 'PageUp') {
-        e.preventDefault();
-        window.litera.navigateChange(-1);
-    } else if (e.key === 'PageDown') {
-        e.preventDefault();
-        window.litera.navigateChange(1);
-    } else if (e.key === 'a' && e.ctrlKey) {
-        e.preventDefault();
-        if (window.litera.changes[window.litera.currentChangeIndex]) {
-            const changeId = window.litera.changes[window.litera.currentChangeIndex].id;
-            window.litera.acceptChange(changeId);
-        }
-    } else if (e.key === 'r' && e.ctrlKey) {
-        e.preventDefault();
-        if (window.litera.changes[window.litera.currentChangeIndex]) {
-            const changeId = window.litera.changes[window.litera.currentChangeIndex].id;
-            window.litera.rejectChange(changeId);
-        }
-    }
-});
+// Initialize
+new LiteraApp();

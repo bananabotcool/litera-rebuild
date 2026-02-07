@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Litera Pro - Full Demo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles-annotations.css">
+    <style>
+        body { font-family: system-ui; padding: 2rem; max-width: 1400px; margin: 0 auto; background: #0f172a; color: #f8fafc; }
+        .demo-section { background: #1e293b; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; }
+        textarea { width: 100%; height: 120px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 1rem; color: #f8fafc; font-family: monospace; }
+        button { background: #3b82f6; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 500; }
+        button:hover { background: #2563eb; }
+        .comparison-view { margin-top: 2rem; }
+        .change-item { background: #252535; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 3px solid #f59e0b; }
+        .change-item.added { border-left-color: #10b981; }
+        .change-item.removed { border-left-color: #ef4444; }
+        ins { background: rgba(16, 185, 129, 0.2); color: #10b981; text-decoration: none; padding: 0 4px; }
+        del { background: rgba(239, 68, 68, 0.2); color: #ef4444; text-decoration: line-through; padding: 0 4px; }
+        .stats { display: flex; gap: 2rem; margin: 1rem 0; }
+        .stat { text-align: center; }
+        .stat-value { font-size: 2rem; font-weight: bold; color: #3b82f6; }
+        .stat-label { color: #64748b; font-size: 0.875rem; }
+    </style>
+</head>
+<body>
+    <h1>Litera Pro - Full Feature Demo</h1>
+    
+    <div class="demo-section">
+        <h2>Original Document</h2>
+        <textarea id="doc1">This is the first paragraph.
+This is the second paragraph that will be modified.
+This paragraph will be deleted entirely.
+This is the fourth paragraph.</textarea>
+    </div>
+    
+    <div class="demo-section">
+        <h2>Revised Document</h2>
+        <textarea id="doc2">This is the first paragraph.
+This is the completely rewritten second paragraph with new content.
+This is the fourth paragraph.
+This is a brand new fifth paragraph added.</textarea>
+    </div>
+    
+    <button onclick="runComparison()">Compare Documents</button>
+    
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-value" id="total-count">0</div>
+            <div class="stat-label">Total Changes</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="accepted-count">0</div>
+            <div class="stat-label">Accepted</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="rejected-count">0</div>
+            <div class="stat-label">Rejected</div>
+        </div>
+    </div>
+    
+    <div id="comparison-results"></div>
+    
+    <script type="module">
+        import { ComparisonEngine } from './js/comparisonEngine.js';
+        import { AnnotationSystem } from './js/annotationSystem.js';
+        import { ChangeManager } from './js/changeManager.js';
+        
+        const engine = new ComparisonEngine();
+        const annotations = new AnnotationSystem();
+        const changeManager = new ChangeManager();
+        
+        // Make globals for UI
+        window.annotations = annotations;
+        window.changeManager = changeManager;
+        
+        window.runComparison = () => {
+            const doc1 = document.getElementById('doc1').value;
+            const doc2 = document.getElementById('doc2').value;
+            
+            if (!doc1 || !doc2) {
+                alert('Please enter text in both documents');
+                return;
+            }
+            
+            const changes = engine.compare(doc1, doc2);
+            
+            // Update stats
+            document.getElementById('total-count').textContent = changes.length;
+            updateStats();
+            
+            // Render with annotations and actions
+            const container = document.getElementById('comparison-results');
+            container.innerHTML = changes.map(c => `
+                <div class="change-item ${c.type}" data-id="${c.id}">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                        <span><strong>${c.type.toUpperCase()}</strong> - Line ${c.lineNumber}</span>
+                        <div class="change-actions">
+                            <button class="btn-accept" onclick="changeManager.acceptChange(${c.id}); updateStats();">Accept</button>
+                            <button class="btn-reject" onclick="changeManager.rejectChange(${c.id}); updateStats();">Reject</button>
+                            <span class="state-badge ${changeManager.getState(c.id)}">${changeManager.getState(c.id)}</span>
+                        </div>
+                    </div>
+                    <div style="background:rgba(0,0,0,0.2); padding:0.75rem; border-radius:6px; font-family:monospace;">
+                        ${engine.generateUnifiedView([c])}
+                    </div>
+                    ${annotations.renderCommentUI(c.id)}
+                </div>
+            `).join('');
+            
+            window.scrollTo(0, document.body.scrollHeight);
+        };
+        
+        window.updateStats = () => {
+            const total = parseInt(document.getElementById('total-count').textContent);
+            let accepted = 0, rejected = 0;
+            
+            // Count from all changes (we'd need to track this properly in real app)
+            document.querySelectorAll('.state-badge.accepted').forEach(() => accepted++);
+            document.querySelectorAll('.state-badge.rejected').forEach(() => rejected++);
+            
+            document.getElementById('accepted-count').textContent = accepted;
+            document.getElementById('rejected-count').textContent = rejected;
+        };
+    </script>
+</body>
+</html>

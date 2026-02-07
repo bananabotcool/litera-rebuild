@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test Word Diff</title></head>
+<body>
+<script type="module">
+import { ComparisonEngine } from './js/comparisonEngine.js';
+
+const engine = new ComparisonEngine();
+
+// Test word-level diff
+const result = engine.wordDiff(
+  "This is the original text here",
+  "This is the modified text there"
+);
+
+console.log('Word diff result:', result);
+document.body.innerHTML = `<h3>Word Diff Test</h3><div style="font-family:monospace">${result}</div>`;
+</script>
+</body>
+</html>

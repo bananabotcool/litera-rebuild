@@ -1,0 +1,172 @@
+/* Annotation & Accept/Reject Styles */
+
+/* Change Actions */
+.change-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.btn-accept, .btn-reject {
+  padding: 0.25rem 0.75rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-accept {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.btn-accept:hover, .btn-accept.active {
+  background: #10b981;
+  color: white;
+}
+
+.btn-reject {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.btn-reject:hover, .btn-reject.active {
+  background: #ef4444;
+  color: white;
+}
+
+.state-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  margin-left: auto;
+}
+
+.state-badge.accepted {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.state-badge.rejected {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.state-badge.pending {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+
+/* Comment Section */
+.comment-section {
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.comment-section h4 {
+  margin-bottom: 0.75rem;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.comment {
+  background: rgba(0,0,0,0.2);
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  border-left: 3px solid #3b82f6;
+}
+
+.comment.resolved {
+  opacity: 0.6;
+  border-left-color: #10b981;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.comment-header .author {
+  font-weight: 600;
+  color: #f59e0b;
+}
+
+.comment-header .time {
+  color: #64748b;
+}
+
+.comment-text {
+  color: #e2e8f0;
+  line-height: 1.4;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.comment-actions button {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  border-radius: 4px;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.comment-actions button:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* Comment Input */
+.comment-input {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.comment-input textarea {
+  width: 100%;
+  min-height: 60px;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 0.5rem;
+  color: white;
+  resize: vertical;
+}
+
+.comment-input textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.comment-input button {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Stats colors */
+.stat-value.success {
+  color: #10b981;
+}
+
+.stat-value.danger {
+  color: #ef4444;
+}
